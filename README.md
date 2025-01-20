@@ -31,6 +31,26 @@ npm install -g node
 npm install -g npm
 ```
 
+### Environment Setup
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+PORT=443
+AZURE_SECRET_NAME=your_secret_name
+AZURE_KEY_VAULT_NAME=your_vault_name
+FLASK_SECRET_KEY=your_flask_secret
+EIDASNODE_LIGHTTOKEN_SECRET=your_eidas_secret
+```
+#### Environment Variables
+
+- `PORT`: The port the server will listen on (defaults to 443 for HTTPS)
+- `AZURE_SECRET_NAME`: Name of the secret in Azure Key Vault
+- `AZURE_KEY_VAULT_NAME`: Name of your Azure Key Vault instance
+- `FLASK_SECRET_KEY`: Secret key for Flask session management
+- `EIDASNODE_LIGHTTOKEN_SECRET`: Secret key for eIDAS light token generation
+
+
 ## Building and Running Locally
 
 ### Step 1: Clone the Repository
