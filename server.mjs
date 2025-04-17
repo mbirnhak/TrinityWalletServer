@@ -13,13 +13,11 @@ const port = process.env.PORT;
 const keyVaultName = process.env.AZURE_KEY_VAULT_NAME;
 const secretName = process.env.AZURE_SECRET_NAME;
 const keyVaultService = new AzureKeyValutService(keyVaultName);
-
-const flaskSecret = process.env.FLASK_SECRET_KEY;
-const eidasNodeSecret = process.env.EIDASNODE_LIGHTTOKEN_SECRET;
-const issuanceService = new CredentialIssuance(flaskSecret, eidasNodeSecret);
+const issuanceService = new CredentialIssuance();
+await issuanceService.initialize();
 
 // Ensure all env variables are loaded
-if (!port || !keyVaultName || !secretName || !flaskSecret || !eidasNodeSecret) {
+if (!port || !keyVaultName || !secretName) {
     console.error("Missing required environment variables.");
     process.exit(1);
 }
@@ -31,10 +29,10 @@ const credentials = { key: privKey, cert: certificate };
 
 // Create http redirect to https
 http.createServer((res, req) => {
-        res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
-        res.end();
-    })
-    
+    res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+    res.end();
+})
+
 const app = express();
 app.use(cors())
 app.get('/', (req, res) => {
@@ -44,14 +42,14 @@ app.get('/', (req, res) => {
 app.get('/azure-secret', async (req, res) => {
     try {
         const secret = await keyVaultService.getSecret(secretName);
-        if(secret) {
-            res.status(200).json({ secret });
+        if (secret) {
+            return res.status(200).json({ secret });
         } else {
-            res.status(404).json({ error: 'Secret not found' });
+            return res.status(404).json({ error: 'Secret not found' });
         }
-    } catch(error) {
+    } catch (error) {
         console.error('Error Retrieving Secret: ', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
@@ -59,13 +57,31 @@ app.get('/issuance-secrets', (req, res) => {
     try {
         const secrets = issuanceService.getSecret();
         if (secrets) {
-            res.status(200).json({ secrets });
+            return res.status(200).json({ secrets });
         } else {
-            res.status(404).json({ error: 'Secrets not found' });
+            return es.status(404).json({ error: 'Secrets not found' });
         }
     } catch (error) {
         console.error('Error Retrieving Issuance Secrets: ', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/credential-issuance', (req, res) => {
+    try {
+        const username = req.query.username;
+        if (!username) {
+            return res.status(400).json({ error: 'Missing required parameter: username' });
+        }
+        const credential = issuanceService.retrieveCredential(username);
+        if (credential) {
+            return res.status(200).json({ credential });
+        } else {
+            return res.status(404).json({ error: 'Secrets not found' });
+        }
+    } catch (error) {
+        console.error('Error Retrieving Issuance Secrets: ', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
