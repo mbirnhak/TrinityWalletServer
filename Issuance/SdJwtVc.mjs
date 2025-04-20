@@ -1,6 +1,7 @@
-import { createSignerVerifier, digest, ES256, generateSalt } from './utils';
+import { createSignerVerifier, digest, ES256, generateSalt } from './utils.mjs';
+import { SDJwtVcInstance } from '@sd-jwt/sd-jwt-vc';
 
-export const createSdJwt = async (privateKey = null, publicKey = null) => {
+export const createSdJwt = async (privateKey, publicKey) => {
     // Create a signer and verifier for issuing and verifying SDJwt credentials
     const { signer, verifier } = await createSignerVerifier(privateKey, publicKey);
 

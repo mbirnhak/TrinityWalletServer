@@ -1,4 +1,4 @@
-import createSdJwt from './SdJwtVc.mjs'
+import { createSdJwt } from './SdJwtVc.mjs'
 
 const usersMap = {
     "mbirnhak": 21006302,
@@ -6,16 +6,15 @@ const usersMap = {
 };
 
 export class CredentialIssuance {
-    async initialize() {
-        this.sdJwtCreator = await createSdJwt();
+    async initialize(privateKey = null, publicKey = null) {
+        this.sdJwtCreator = await createSdJwt(privateKey, publicKey);
     }
 
     async retrieveCredential(username) {
         try {
             if (username in usersMap) {
-                studentId = usersMap[username];
-                const credential = this.sdJwtCreator.issueStudentIdCredential(studentId);
-                console.log("Credential: ", credential);
+                const studentId = usersMap[username];
+                const credential = await this.sdJwtCreator.issueStudentIdCredential(studentId);
                 return credential;
             } else {
                 console.log("Student username does not exist in database.")

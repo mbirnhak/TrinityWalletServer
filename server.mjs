@@ -1,20 +1,22 @@
 import express from "express";
-import { AzureKeyValutService } from "./AzureKeyVaultService.mjs";
+import { AzureKeyValutService } from "./Azure/AzureKeyVaultService.mjs";
 import dotenv from "dotenv";
 import cors from "cors";
 import https from "https"
 import http from "http"
 import fs from "fs";
-import { CredentialIssuance } from "./CredentialIssuance.mjs";
+import { CredentialIssuance } from "./Issuance/CredentialIssuance.mjs";
 
 // Configure environment variables
 dotenv.config();
 const port = process.env.PORT;
 const keyVaultName = process.env.AZURE_KEY_VAULT_NAME;
 const secretName = process.env.AZURE_SECRET_NAME;
+const privateKey = JSON.parse(process.env.PRIVATE_KEY);
+const publicKey = JSON.parse(process.env.PUBLIC_KEY);
 const keyVaultService = new AzureKeyValutService(keyVaultName);
 const issuanceService = new CredentialIssuance();
-await issuanceService.initialize();
+await issuanceService.initialize(privateKey, publicKey);
 
 // Ensure all env variables are loaded
 if (!port || !keyVaultName || !secretName) {
@@ -31,7 +33,7 @@ const credentials = { key: privKey, cert: certificate };
 http.createServer((res, req) => {
     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
     res.end();
-})
+}).listen(80);
 
 const app = express();
 app.use(cors())
@@ -59,7 +61,7 @@ app.get('/issuance-secrets', (req, res) => {
         if (secrets) {
             return res.status(200).json({ secrets });
         } else {
-            return es.status(404).json({ error: 'Secrets not found' });
+            return res.status(404).json({ error: 'Secrets not found' });
         }
     } catch (error) {
         console.error('Error Retrieving Issuance Secrets: ', error);
@@ -67,17 +69,17 @@ app.get('/issuance-secrets', (req, res) => {
     }
 });
 
-app.get('/credential-issuance', (req, res) => {
+app.get('/credential-issuance', async (req, res) => {
     try {
         const username = req.query.username;
         if (!username) {
             return res.status(400).json({ error: 'Missing required parameter: username' });
         }
-        const credential = issuanceService.retrieveCredential(username);
-        if (credential) {
+        const credential = await issuanceService.retrieveCredential(username);
+        if (credential !== null) {
             return res.status(200).json({ credential });
         } else {
-            return res.status(404).json({ error: 'Secrets not found' });
+            return res.status(404).json({ error: 'Credential not found' });
         }
     } catch (error) {
         console.error('Error Retrieving Issuance Secrets: ', error);

@@ -6,9 +6,7 @@ export const createSignerVerifier = async (privateKey, publicKey) => {
   if (!(privateKey && publicKey)) {
     const keyPair = await ES256.generateKeyPair();
     privKey = keyPair.privateKey;
-    pubKey = keyPair.privateKey;
-    console.log("Private: ", privKey);
-    console.log("Public: ", pubKey);
+    pubKey = keyPair.publicKey;
   } else {
     privKey = privateKey;
     pubKey = publicKey;
