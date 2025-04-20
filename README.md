@@ -44,11 +44,11 @@ EIDASNODE_LIGHTTOKEN_SECRET=your_eidas_secret
 ```
 #### Environment Variables
 
+- `PRIVATE_KEY`: Issuers private key for signing credentials in JWK format
+- `PUBLIC_KEY`:  Issuers public key associated with private key, in JWK format
 - `PORT`: The port the server will listen on (defaults to 443 for HTTPS)
 - `AZURE_SECRET_NAME`: Name of the secret in Azure Key Vault
 - `AZURE_KEY_VAULT_NAME`: Name of your Azure Key Vault instance
-- `FLASK_SECRET_KEY`: Secret key for Flask session management
-- `EIDASNODE_LIGHTTOKEN_SECRET`: Secret key for eIDAS light token generation
 
 
 ## Building and Running Locally
