@@ -72,10 +72,10 @@ npm install
 
 ### Step 3: Create SSL/TLS Keys and Certificates
 
-To enable secure communication via SSL/TLS, generate SSL keys and a certificate:
+To enable secure communication via SSL/TLS, generate SSL keys and a certificate (must have a san.cnf file with configurations):
 
 ```bash
-openssl req -nodes -new -x509 -keyout server.key -out server.cert -days 365 -subj "/CN=localhost"
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem -config san.cnf -extensions v3_req
 ```
 
 ### Step 4: Run the Server
@@ -87,3 +87,7 @@ node server.mjs
 ```
 
 The server will start on https://localhost:443 with SSL/TLS enabled.
+You can expose it tmeporarily with the following command:
+```bash
+cloudflared tunnel --no-tls-verify --url https://localhost:443
+```

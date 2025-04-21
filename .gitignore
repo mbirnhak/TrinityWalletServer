@@ -4,6 +4,6 @@ node_modules/
 *.log
 *.tmp
 *.bak
-server.cert
-server.key
+cert.pem
+key.pem
 san.cnf
