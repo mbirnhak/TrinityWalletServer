@@ -2,36 +2,55 @@
 
 ## Overview
 
-This server provides a secure way for **TrinityWallet** (a digital identity wallet conforming to eIDAS 2.0) to access certain secrets. It will likely server as the mock wallet provider server for TrinityWallet in the future.
+TrinityWallet Server provides a secure backend for **TrinityWallet** — a digital identity wallet that conforms to eIDAS 2.0 standards. This server facilitates secure access to critical secrets and will likely serve as the mock wallet provider server for TrinityWallet in future implementations.
 
 ## Features
 
-- Secure retrieval of secrets for TrinityWallet
-- TLS/SSL-enabled communication for secure data transmission
-- Easy setup for local development and testing
+- Secure retrieval and management of wallet secrets  
+- Credential issuance and verification capabilities  
+- TLS/SSL-enabled communication for robust data security  
+- Azure Key Vault integration for secret management  
+- RESTful API endpoints for wallet operations  
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Building and Running Locally](#building-and-running-locally)
+- [Prerequisites](#prerequisites)  
+- [Installation](#installation)  
+- [Configuration](#configuration)  
+- [Building and Running](#building-and-running)  
+- [API Endpoints](#api-endpoints)  
 
-## Installation
+## Prerequisites
 
-### Prerequisites
+Before running the server, ensure you have the following installed:
 
-Before running the server locally, ensure the following dependencies are installed:
-
-- **Node.js** (version 14.x or higher)
-- **npm** (Node Package Manager)
-
-You can install them by running:
+- **Node.js** (version 14.x or higher)  
+- **npm** (Node Package Manager)  
 
 ```bash
+# Install or update Node.js and npm if needed
 npm install -g node
 npm install -g npm
 ```
 
-### Environment Setup
+## Installation
+
+### Clone the Repository
+
+```bash
+git clone <repository-url>
+cd TrinityWalletServer
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+## Configuration
+
+### Environment Variables
 
 Create a `.env` file in the root directory with the following variables:
 
@@ -39,55 +58,49 @@ Create a `.env` file in the root directory with the following variables:
 PORT=443
 AZURE_SECRET_NAME=your_secret_name
 AZURE_KEY_VAULT_NAME=your_vault_name
-FLASK_SECRET_KEY=your_flask_secret
-EIDASNODE_LIGHTTOKEN_SECRET=your_eidas_secret
+PRIVATE_KEY={"your":"private_key_in_jwk_format"}
+PUBLIC_KEY={"your":"public_key_in_jwk_format"}
 ```
-#### Environment Variables
 
-- `PRIVATE_KEY`: Issuers private key for signing credentials in JWK format
-- `PUBLIC_KEY`:  Issuers public key associated with private key, in JWK format
-- `PORT`: The port the server will listen on (defaults to 443 for HTTPS)
-- `AZURE_SECRET_NAME`: Name of the secret in Azure Key Vault
-- `AZURE_KEY_VAULT_NAME`: Name of your Azure Key Vault instance
+#### Required Variables
 
+- `PRIVATE_KEY`: Issuer's private key for credential signing (JWK format)  
+- `PUBLIC_KEY`: Issuer's public key associated with the private key (JWK format)  
+- `PORT`: Server listening port (defaults to 443 for HTTPS)  
+- `AZURE_SECRET_NAME`: Name of the secret in Azure Key Vault  
+- `AZURE_KEY_VAULT_NAME`: Name of your Azure Key Vault instance  
 
-## Building and Running Locally
+### SSL/TLS Configuration
 
-### Step 1: Clone the Repository
-
-Clone the repository to your local machine:
+Generate SSL keys and certificate for secure communications:
 
 ```bash
-git clone <repository-url>
-cd TrinityWalletServer
+# Requires san.cnf file with appropriate configurations
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout key.pem -out cert.pem \
+  -config san.cnf -extensions v3_req
 ```
 
-### Step 2: Install Dependencies
+## Building and Running
 
-Install the necessary dependencies:
-
-```bash
-npm install
-```
-
-### Step 3: Create SSL/TLS Keys and Certificates
-
-To enable secure communication via SSL/TLS, generate SSL keys and a certificate (must have a san.cnf file with configurations):
-
-```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem -config san.cnf -extensions v3_req
-```
-
-### Step 4: Run the Server
-
-Run the server using:
+### Start the Server
 
 ```bash
 node server.mjs
 ```
 
-The server will start on https://localhost:443 with SSL/TLS enabled.
-You can expose it tmeporarily with the following command:
+The server will start on `https://localhost:443` with SSL/TLS enabled.
+
+### Expose Locally for Testing
+
+For temporary external access during development:
+
 ```bash
 cloudflared tunnel --no-tls-verify --url https://localhost:443
 ```
+
+## API Endpoints
+
+- `GET /` — Welcome message  
+- `GET /azure-secret` — Retrieve secrets from Azure Key Vault
+- `GET /credential-issuance?username=<username>` — Issue and verify credentials for a specific username
