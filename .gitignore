@@ -6,3 +6,4 @@ node_modules/
 *.bak
 server.cert
 server.key
+san.cnf

@@ -25,8 +25,8 @@ if (!port || !keyVaultName || !secretName) {
 }
 
 // Load SSL/TLS cert. and key
-const privKey = fs.readFileSync("server.key", "utf-8");
-const certificate = fs.readFileSync("server.cert", "utf-8");
+const privKey = fs.readFileSync("key.pem", "utf-8");
+const certificate = fs.readFileSync("cert.pem", "utf-8");
 const credentials = { key: privKey, cert: certificate };
 
 // Create http redirect to https
@@ -76,6 +76,8 @@ app.get('/credential-issuance', async (req, res) => {
             return res.status(400).json({ error: 'Missing required parameter: username' });
         }
         const credential = await issuanceService.retrieveCredential(username);
+        const ver = await issuanceService.verifyCredential(credential);
+        console.log("Verified: ", ver);
         if (credential !== null) {
             return res.status(200).json({ credential });
         } else {
