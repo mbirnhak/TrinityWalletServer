@@ -2,14 +2,12 @@ import express from "express";
 import { AzureKeyValutService } from "./Azure/AzureKeyVaultService.mjs";
 import dotenv from "dotenv";
 import cors from "cors";
-import https from "https"
-import http from "http"
 import fs from "fs";
 import { CredentialIssuance } from "./Issuance/CredentialIssuance.mjs";
 
 // Configure environment variables
 dotenv.config();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000; // Handled by Vercel
 const keyVaultName = process.env.AZURE_KEY_VAULT_NAME;
 const secretName = process.env.AZURE_SECRET_NAME;
 const privateKey = JSON.parse(process.env.PRIVATE_KEY);
@@ -24,19 +22,20 @@ if (!port || !keyVaultName || !secretName) {
     process.exit(1);
 }
 
-// Load SSL/TLS cert. and key
-const privKey = fs.readFileSync("key.pem", "utf-8");
-const certificate = fs.readFileSync("cert.pem", "utf-8");
-const credentials = { key: privKey, cert: certificate };
+// Load SSL/TLS cert. and key (Now handled by Vercel)
+// const privKey = fs.readFileSync("key.pem", "utf-8");
+// const certificate = fs.readFileSync("cert.pem", "utf-8");
+// const credentials = { key: privKey, cert: certificate };
 
-// Create http redirect to https
-http.createServer((res, req) => {
-    res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
-    res.end();
-}).listen(80);
+// Create http redirect to https (Now handled by Vercel)
+// http.createServer((res, req) => {
+//     res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+//     res.end();
+// }).listen(80);
 
 const app = express();
 app.use(cors())
+
 app.get('/', (req, res) => {
     res.send('Welcome to my Server!')
 });
@@ -89,6 +88,8 @@ app.get('/credential-issuance', async (req, res) => {
     }
 });
 
-https.createServer(credentials, app).listen(port, () => {
+app.listen(port, () => {
     console.log(`Server is listening on port ${port}`)
 });
+
+export default app;
