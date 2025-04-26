@@ -1,23 +1,27 @@
-import express from "express";
-import { AzureKeyValutService } from "./Azure/AzureKeyVaultService.mjs";
-import dotenv from "dotenv";
 import cors from "cors";
-import fs from "fs";
+import dotenv from "dotenv";
+import express from "express";
 import { CredentialIssuance } from "./Issuance/CredentialIssuance.mjs";
+import { AzureKeyValutService } from "./Azure/AzureKeyVaultService.mjs";
 
 // Configure environment variables
 dotenv.config();
-const port = process.env.PORT || 3000; // Handled by Vercel
+// const port = process.env.PORT || 3000; // Handled by Vercel
 const keyVaultName = process.env.AZURE_KEY_VAULT_NAME;
 const secretName = process.env.AZURE_SECRET_NAME;
 const privateKey = JSON.parse(process.env.PRIVATE_KEY);
 const publicKey = JSON.parse(process.env.PUBLIC_KEY);
 const keyVaultService = new AzureKeyValutService(keyVaultName);
 const issuanceService = new CredentialIssuance();
-await issuanceService.initialize(privateKey, publicKey);
+// Initialize the service
+const initializeServices = async () => {
+    await issuanceService.initialize(privateKey, publicKey);
+};
+
+initializeServices().catch(console.error);
 
 // Ensure all env variables are loaded
-if (!port || !keyVaultName || !secretName) {
+if (!keyVaultName || !secretName) {
     console.error("Missing required environment variables.");
     process.exit(1);
 }
@@ -88,8 +92,9 @@ app.get('/credential-issuance', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`)
-});
+// Start the server (Now handled by Vercel)
+// app.listen(port, () => {
+//     console.log(`Server is listening on port ${port}`)
+// });
 
 export default app;
