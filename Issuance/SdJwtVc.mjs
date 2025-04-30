@@ -28,7 +28,7 @@ export const createSdJwt = async (privateKey, publicKey) => {
             try {
                 return await sdjwt.issue({
                     iss: 'TrinCredIssuer',
-                    iat: new Date().getTime(),
+                    iat: Math.floor(new Date().getTime() / 1000),
                     vct: 'trin.coll.student_id_sd_jwt_vc',
                     ...claims
                 }, disclosureFrame);

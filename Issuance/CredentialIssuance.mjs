@@ -2,7 +2,7 @@ import { createSdJwt } from './SdJwtVc.mjs'
 
 const usersMap = {
     "mbirnhak": 21006302,
-    "sdwivedi": 2
+    "sdwivedi": 21027665,
 };
 
 export class CredentialIssuance {
